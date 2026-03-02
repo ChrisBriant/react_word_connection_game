@@ -112,6 +112,19 @@ img {
   background-color: rgb(190, 225, 255);
 }
 
+/* CLUE BOX  */
+.clueArea {
+    background-color:blanchedalmond;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.clueArea .heading {
+  background-color: #090342;
+  color: #fff;
+}
+
+/* SCORE AREA  */
+
 .gameArea .scoreDisplay {
   display: flex;
   flex-direction: column;
@@ -126,14 +139,29 @@ img {
 
 }
 
+.gameArea .scoreDisplay .goal .row,
 .gameArea .scoreDisplay .row {
   display: flex;
   flex-direction: row;
 }
 
+
+.gameArea .scoreDisplay .col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gameArea .goalImage {
+  width: 30px;
+  height: 40px;
+}
+
+
 .gameArea .scoreDisplay .row p{
   margin: 0 10px;
 }
+
+
 
 /* LOADING WIDGET  */
 

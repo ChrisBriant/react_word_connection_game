@@ -23,4 +23,24 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Scoring System
 
-Guess correctly * number of selected words
+Clue giver - Guess correctly number of selected words
+Guesser - 1 point per correct guess
+
+
+Cooperative introduce overall goal
+
+>12 Bronze
+>18 Silver Medal
+>25 Gold Medal
+
+Words Selected	Points if Correct
+3	5 pts
+4	8 pts
+5	12 pts
+6	18 pts
+7	25 pts
+8	35 pts
+9	50 pts
+
+
+
