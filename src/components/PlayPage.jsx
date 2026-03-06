@@ -4,6 +4,7 @@ import LoadingWidget from "./LoadingWidget";
 import { filterToLowercaseLetters, checkAlphabeticCharactersOnly } from "../utils/utils";
 import ScoreWidget from "./ScoreWidget";
 import ScoreCoOpWidget from "./ScoreCoOpWidget";
+import PopupMessage from "./PopupMessage";
 
 const PlayPage = (props) => {
     //console.log("PLAY PAGE", props)
@@ -24,6 +25,15 @@ const PlayPage = (props) => {
     const [clue, setClue] = useState("");
     const [clueId,setClueId] = useState(null);
     const [clueWordCount, setClueWordCount] = useState(0);
+    const [showPopup,setShowPopup] = useState(false)
+    
+    ;
+    const [popUpMessageTitle, setPopupMessageTitle] = useState("hello");
+    const [popUpChildren, setPopUpChildren] = useState((
+        <div className="messageArea">
+            <p>THIS IS THE MESSAGE AREA</p>
+        </div>
+    )); 
 
     useEffect(() => {
         //Make call to API
@@ -320,6 +330,30 @@ const PlayPage = (props) => {
         newScore.round = score.round + 1; 
         setScore(newScore);
         setNewTurn(true);
+
+        //Set the popup message
+        if(isMatch) {
+            setPopupMessageTitle("Well Done!");
+            setPopUpChildren((
+                <div className="popUpContent">
+                    <p>The computer guessed the word "{formattedClueWord}" correctly 
+                        and you have earned {wordCount} points.
+                    </p>
+                </div>
+            ));
+        } else {
+            setPopupMessageTitle("Unlucky!");
+            setPopUpChildren((
+                <div className="popUpContent">
+                    <p>The computer didn't guess the word correctly.
+                    </p>
+                </div>
+            ));
+        }
+        setShowPopup(true);
+        
+
+
         setLoading(false);
     }
 
@@ -380,8 +414,40 @@ const PlayPage = (props) => {
             const newScore = {...score};
             if(guessIsCorrect) {
                 newScore.overall = score.overall + clueWordCount; 
+                //Set the popup dialog
+                setPopupMessageTitle("Well Done!");
+                setPopUpChildren((
+                    <div className="popUpContent">
+                        <p>You correctly guessed the right words  
+                            and you have earned {clueWordCount} points.
+                        </p>
+                    </div>
+                ));
+            } else {
+                setPopupMessageTitle("Unlucky!");
+                setPopUpChildren((
+                    <div className="popUpContent">
+                        <p>You didn't guess correctly.</p>
+                        <p>The words matching the clue are:</p>
+                        <div className="aiWordSelectionResult">
+                            {
+                                resSelectedWords.map((w) => (
+                                    <div key={w.id} className="correctWord">
+                                        <p>{w.word}</p>
+                                    </div>
+                                ))
+                            }
+                        </div>
+
+                    </div>
+                ));
             }
-            newScore.round = score.round + 1; 
+            setShowPopup(true);
+            newScore.round = score.round + 1;
+            //TODO NEEDS A FUNCTION TO CHECK IF THE ROUND IS ON THE LAST AND IF SO THEN IT NEEDS TO DISPLAY THE SCORES IN
+            // A POPUP DIALOG AND EXIT
+            //THIS NEEDS TO BE CALLED FROM THE OTHER SCORING METHOD AS WELL
+            // FIRST - STYLIZE THE OUTPUT OF THE RESULTS
             setScore(newScore);
             setNewTurn(true);
             setLoading(false);
@@ -399,6 +465,14 @@ const PlayPage = (props) => {
 
     return (
         <div id="playPage">
+            {
+                showPopup
+                ? <PopupMessage title={popUpMessageTitle} onDismiss={() => setShowPopup(false)}>
+                    {popUpChildren}
+                </PopupMessage>
+                : null
+            }
+
             {
                 loading
                 ? <LoadingWidget />
