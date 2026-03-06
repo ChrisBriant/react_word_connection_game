@@ -112,6 +112,19 @@ const PlayPage = (props) => {
         });
     }
 
+    const getWordSelection = () => {
+        getRequest("/getwordselection", connWithApiKey).then((data) => {
+            console.log("DATA FROM ENDPOINT", data);
+            setWordData(data);
+            setLoading(false);
+            
+        }).catch(err => {
+            console.log("NETWORK ERROR", err);
+            setLoading(false);
+            setNetworkError(true);
+        });
+    }
+
 
     const handleNavigateToStart = () => {
         console.log("PROPS", props)
@@ -318,9 +331,71 @@ const PlayPage = (props) => {
             setNewTurn(false);
         } else {
             props.setPlayer("human");
+            getWordSelection();
+            setClueWord("");
             setNewTurn(false);
         }
     }
+
+    const _checkWordMatch = (word) => {
+        //Get the word from the word list
+        const playerSelectedWord = wordData.filter((w) => w.id === word.id)[0];
+
+
+        console.log("Player Selected word")
+
+        if(playerSelectedWord && playerSelectedWord.selected === word.selected) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    const _handleSendGuessToAi = () => {
+        setErrorMessages([]);
+        //Check that the right number of words is selected
+        const selectedWordLength = wordData.filter((word) => word.selected).length;
+        if(!(selectedWordLength === clueWordCount)) {
+            setErrorMessages([`You must select ${clueWordCount} words`]);
+            return;
+        }
+        setLoading(true);
+        //Get the result from the AI
+        getRequest(`/getclueresponsefromid?clue_id=${clueId}`,connWithApiKey).then((res) => {
+            console.log("RESPONSE", res);
+            //Check the response matches
+            let guessIsCorrect = true;
+            //Get selected words
+            const resSelectedWords = res.words.filter((w) =>  w.selected);
+            console.log("SELECTED WORDS FROM RESPONSE", res.words);
+            for (const word of resSelectedWords) {
+                const matched = _checkWordMatch(word);
+                if(!matched) {
+                    guessIsCorrect = false;
+                    break;
+                }
+            }
+            console.log("DID I GUESS CORRECTLY?", guessIsCorrect);
+            //increment the round
+            const newScore = {...score};
+            if(guessIsCorrect) {
+                newScore.overall = score.overall + clueWordCount; 
+            }
+            newScore.round = score.round + 1; 
+            setScore(newScore);
+            setNewTurn(true);
+            setLoading(false);
+        }).catch((err) => {
+            console.error("Error", err);
+            setErrorMessages(["An error occurred checking your guess."]);
+            setLoading(false);
+            return;
+        });
+
+        setLoading(false);
+
+    }
+
 
     return (
         <div id="playPage">
@@ -408,6 +483,15 @@ const PlayPage = (props) => {
                                             ))
                                         }
                                     </div>
+                                    {
+                                        newTurn
+                                        ? <div className="actionButton">
+                                            <button onClick={() => _handleSwapPlayer()}>Next</button>
+                                        </div>
+                                        : <div className="actionButton">
+                                            <button onClick={() => _handleSendGuessToAi()}>Send</button>
+                                        </div>
+                                    }
                                 </>
                             }
 
